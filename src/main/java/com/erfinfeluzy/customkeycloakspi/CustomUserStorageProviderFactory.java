@@ -75,7 +75,7 @@ public class CustomUserStorageProviderFactory implements UserStorageProviderFact
     @Override
     public String getId() {
         log.info("[I69] getId()");
-      return "rizal-userprovider-spi-mysql";
+      return "custom-userprovider-spi-oracledb";
     }
 
     
