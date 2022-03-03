@@ -38,6 +38,23 @@ public class CustomUserStorageProvider implements UserStorageProvider,
     private KeycloakSession ksession;
     private ComponentModel model;
 
+    //MYSQL
+    // private static final String Q_GET_USER_BY_USERNAME  = "select username, firstName,lastName, email, birthDate from users where username = ?";
+    // private static final String Q_GET_USER_BY_EMAIL     = "select username, firstName,lastName, email, birthDate from users where email = ?";
+    // private static final String Q_GET_PASS              = "select password from users where username = ?";
+    // private static final String Q_GET_USERS             = "select username, firstName,lastName, email, birthDate from users order by username limit ? offset ?";
+    // private static final String Q_SEARCH_BY_USERNAME    = "select username, firstName,lastName, email, birthDate from users where username like ? order by username limit ? offset ?";
+
+    //ORACLE
+    private static final String Q_GET_USER_BY_USERNAME  = "select USERNAME, FULLNAME, FULLNAME, EMAIL, CREATIONDATE from USERDEVELOPER where USERNAME = ?";
+    private static final String Q_GET_USER_BY_EMAIL     = "select USERNAME, FULLNAME, FULLNAME, EMAIL, CREATIONDATE from USERDEVELOPER where EMAIL = ?";
+    private static final String Q_GET_PASS              = "select PASSWORD from USERDEVELOPER where USERNAME = ?";
+    // private static final String Q_GET_USERS             = "select USERNAME, FULLNAME, FULLNAME, EMAIL, CREATIONDATE from USERDEVELOPER order by USERNAME limit ? offset ?";
+    private static final String Q_GET_USERS             = "select USERNAME, FULLNAME, FULLNAME, EMAIL, CREATIONDATE from USERDEVELOPER order by USERNAME offset ? rows fetch first ? rows only";
+    // private static final String Q_SEARCH_BY_USERNAME    = "select USERNAME, FULLNAME, FULLNAME, EMAIL, CREATIONDATE from USERDEVELOPER where USERNAME like ? order by USERNAME limit ? offset ?";
+    private static final String Q_SEARCH_BY_USERNAME    = "select USERNAME, FULLNAME, FULLNAME, EMAIL, CREATIONDATE from USERDEVELOPER where USERNAME like ? order by USERNAME offset ? rows fetch first ? rows only";
+
+
     public CustomUserStorageProvider(KeycloakSession ksession, ComponentModel model) {
         this.ksession = ksession;
         this.model = model;
@@ -59,7 +76,7 @@ public class CustomUserStorageProvider implements UserStorageProvider,
     public UserModel getUserByUsername(String username, RealmModel realm) {
         log.info("[I41] getUserByUsername({})",username);
         try ( Connection c = DbUtil.getConnection(this.model)) {
-            PreparedStatement st = c.prepareStatement("select username, firstName,lastName, email, birthDate from users where username = ?");
+            PreparedStatement st = c.prepareStatement(Q_GET_USER_BY_USERNAME);
             st.setString(1, username);
             st.execute();
             ResultSet rs = st.getResultSet();
@@ -79,7 +96,7 @@ public class CustomUserStorageProvider implements UserStorageProvider,
     public UserModel getUserByEmail(String email, RealmModel realm) {
         log.info("[I48] getUserByEmail({})",email);
         try ( Connection c = DbUtil.getConnection(this.model)) {
-            PreparedStatement st = c.prepareStatement("select username, firstName,lastName, email, birthDate from users where email = ?");
+            PreparedStatement st = c.prepareStatement(Q_GET_USER_BY_EMAIL);
             st.setString(1, email);
             st.execute();
             ResultSet rs = st.getResultSet();
@@ -119,7 +136,7 @@ public class CustomUserStorageProvider implements UserStorageProvider,
         String username = sid.getExternalId();
         
         try ( Connection c = DbUtil.getConnection(this.model)) {
-            PreparedStatement st = c.prepareStatement("select password from users where username = ?");
+            PreparedStatement st = c.prepareStatement(Q_GET_PASS);
             st.setString(1, username);
             st.execute();
             ResultSet rs = st.getResultSet();
@@ -165,7 +182,7 @@ public class CustomUserStorageProvider implements UserStorageProvider,
         log.info("[I113] getUsers: realm={}", realm.getName());
         
         try ( Connection c = DbUtil.getConnection(this.model)) {
-            PreparedStatement st = c.prepareStatement("select username, firstName,lastName, email, birthDate from users order by username limit ? offset ?");
+            PreparedStatement st = c.prepareStatement(Q_GET_USERS);
             st.setInt(1, maxResults);
             st.setInt(2, firstResult);
             st.execute();
@@ -191,7 +208,7 @@ public class CustomUserStorageProvider implements UserStorageProvider,
         log.info("[I139] searchForUser: realm={}", realm.getName());
         
         try ( Connection c = DbUtil.getConnection(this.model)) {
-            PreparedStatement st = c.prepareStatement("select username, firstName,lastName, email, birthDate from users where username like ? order by username limit ? offset ?");
+            PreparedStatement st = c.prepareStatement(Q_SEARCH_BY_USERNAME);
             st.setString(1, search);
             st.setInt(2, maxResults);
             st.setInt(3, firstResult);
@@ -210,7 +227,7 @@ public class CustomUserStorageProvider implements UserStorageProvider,
 
     @Override
     public List<UserModel> searchForUser(Map<String, String> params, RealmModel realm) {
-        return searchForUser(params,realm,0,5000);
+        return searchForUser(params,realm,0,1000);
     }
 
     @Override
@@ -237,12 +254,30 @@ public class CustomUserStorageProvider implements UserStorageProvider,
     //------------------- Implementation 
     private UserModel mapUser(RealmModel realm, ResultSet rs) throws SQLException {
         
-        DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-        CustomUser user = new CustomUser.Builder(ksession, realm, model, rs.getString("username"))
-          .email(rs.getString("email"))
-          .firstName(rs.getString("firstName"))
-          .lastName(rs.getString("lastName"))
-          .birthDate(rs.getDate("birthDate"))
+        // DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+        // CustomUser user = new CustomUser.Builder(ksession, realm, model, rs.getString("username"))
+        //   .email(rs.getString("email"))
+        //   .firstName(rs.getString("firstName"))
+        //   .lastName(rs.getString("lastName"))
+        //   .birthDate(rs.getDate("birthDate"))
+        //   .build();
+
+        String fullName = rs.getString("FULLNAME");
+        String firstName = "";
+        String lastName = "";
+        int idx = fullName.lastIndexOf(' ');
+        if (idx == -1){
+            firstName = fullName;
+        }else{
+            firstName = fullName.substring(0, idx);
+            lastName = fullName.substring(idx + 1);
+        }
+
+        CustomUser user = new CustomUser.Builder(ksession, realm, model, rs.getString("USERNAME"))
+          .email(rs.getString("EMAIL"))
+          .firstName(firstName)
+          .lastName(lastName)
+          .birthDate(rs.getDate("CREATIONDATE"))
           .build();
         
         return user;
