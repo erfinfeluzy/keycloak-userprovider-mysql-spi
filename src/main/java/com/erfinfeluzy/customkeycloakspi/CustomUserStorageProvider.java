@@ -46,13 +46,13 @@ public class CustomUserStorageProvider implements UserStorageProvider,
     // private static final String Q_SEARCH_BY_USERNAME    = "select username, firstName,lastName, email, birthDate from users where username like ? order by username limit ? offset ?";
 
     //ORACLE
-    private static final String Q_GET_USER_BY_USERNAME  = "select USERNAME, FULLNAME, FULLNAME, EMAIL, CREATIONDATE from RH_POC_USER where USERNAME = ? ";
-    private static final String Q_GET_USER_BY_EMAIL     = "select USERNAME, FULLNAME, FULLNAME, EMAIL, CREATIONDATE from RH_POC_USER where EMAIL = ? ";
+    private static final String Q_GET_USER_BY_USERNAME  = "select USERNAME, FULLNAME, EMAIL, CREATIONDATE from RH_POC_USER where USERNAME = ? ";
+    private static final String Q_GET_USER_BY_EMAIL     = "select USERNAME, FULLNAME, EMAIL, CREATIONDATE from RH_POC_USER where EMAIL = ? ";
     private static final String Q_GET_PASS              = "select PASSWORD from USERDEVELOPER where USERNAME = ? ";
     // private static final String Q_GET_USERS             = "select USERNAME, FULLNAME, FULLNAME, EMAIL, CREATIONDATE from USERDEVELOPER order by USERNAME limit ? offset ?";
-    private static final String Q_GET_USERS             = "select * from (select rownum offset, rs.* from (select USERNAME, FULLNAME, FULLNAME, EMAIL, CREATIONDATE from RH_POC_USER order by USERNAME ) rs) where rownum <= ? and offset >= ? ";
+    private static final String Q_GET_USERS             = "select * from (select rownum offset, rs.* from (select USERNAME, FULLNAME, EMAIL, CREATIONDATE from RH_POC_USER order by USERNAME ) rs) where rownum <= ? and offset >= ? ";
     // private static final String Q_SEARCH_BY_USERNAME    = "select USERNAME, FULLNAME, FULLNAME, EMAIL, CREATIONDATE from USERDEVELOPER where USERNAME like ? order by USERNAME limit ? offset ?";
-    private static final String Q_SEARCH_BY_USERNAME    = "select * from (select rownum offset, rs.* from (select USERNAME, FULLNAME, FULLNAME, EMAIL, CREATIONDATE from RH_POC_USER where USERNAME like ? order by USERNAME ) rs) where rownum <= ? and offset >= ?";
+    private static final String Q_SEARCH_BY_USERNAME    = "select * from (select rownum offset, rs.* from (select USERNAME, FULLNAME, EMAIL, CREATIONDATE from RH_POC_USER where USERNAME like ? order by USERNAME ) rs) where rownum <= ? and offset >= ?";
 
 
     public CustomUserStorageProvider(KeycloakSession ksession, ComponentModel model) {

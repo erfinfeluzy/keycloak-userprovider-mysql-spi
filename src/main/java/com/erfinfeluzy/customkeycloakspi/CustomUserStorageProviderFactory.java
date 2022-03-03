@@ -31,7 +31,7 @@ public class CustomUserStorageProviderFactory implements UserStorageProviderFact
             .label("JDBC Driver Class")
             .type(ProviderConfigProperty.STRING_TYPE)
             // .defaultValue("com.mysql.cj.jdbc.Driver")
-            .defaultValue("oracle.jdbc.Driver")
+            .defaultValue("oracle.jdbc.OracleDriver")
             .helpText("Fully qualified class name of the JDBC driver")
             .add()
           .property()
